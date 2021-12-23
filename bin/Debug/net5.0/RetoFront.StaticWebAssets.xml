@@ -1,0 +1,4 @@
+﻿<StaticWebAssets Version="1.0">
+  <ContentRoot BasePath="/" Path="C:\Users\Automatizacion\source\repos\RetoFront\bin\Debug\net5.0\wwwroot\" />
+  <ContentRoot BasePath="/" Path="C:\Users\Automatizacion\source\repos\RetoFront\obj\Debug\net5.0\scopedcss\bundle\" />
+</StaticWebAssets>

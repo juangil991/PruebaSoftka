@@ -1,0 +1,55 @@
+﻿@using RetoFront.Data
+@using RetoFront.Components
+@using System.Net.Http.Json
+@using Newtonsoft.Json
+@inject HttpClient http
+@inject NavigationManager Navi
+<!-- ventana emergente para registrar quien juega-->
+
+<div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Ingrese su Usuario (No puede quedar vacio)</h4>
+                
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@Nwusers">
+                    <tr>
+                        <td>Ingreser su Nombre:</td>
+
+                    </tr>
+                    <tr>
+                        <td><input type="text" @bind="Nwusers.Usuario" /></td>
+                        <td></td>
+                    </tr>
+                </EditForm>
+
+
+            </div>
+            @if (Nwusers.Usuario != null)
+            {
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" @onclick="NewUser">OK</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+
+    public UsersRequest<object> Respuesta = new UsersRequest<object>(); // respuesta de la solicitud HttpPOST para registrar un usuario
+    public User Nwusers = new User(); //usuario a enviar a la base de datos pormedio de HttpPOST 
+    string url = "https://localhost:44376/api/Users";
+
+    //Funcion para regitrar el usuario al presionar OK
+    private async Task NewUser()
+    {
+        var response = await http.PostAsJsonAsync<User>(url, Nwusers);
+        Respuesta = response.Content.ReadFromJsonAsync<UsersRequest<object>>().Result;
+        Navi.NavigateTo("/preguntas");
+    }
+
+
+}

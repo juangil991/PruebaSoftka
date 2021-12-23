@@ -1,0 +1,91 @@
+﻿@page "/"
+@using RetoFront.Data
+@using RetoFront.Components
+@using System.Net.Http.Json
+@using Newtonsoft.Json
+@inject HttpClient http
+@inject NavigationManager Navi
+
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark " id="mainNav">
+    <div class="container px-4">
+        <a class="navbar-brand text-left" style="color:white">RETO TECNICO</a>
+
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="/History">ULTIMOS PUNTAJES</a></li>
+
+        </ul>
+
+    </div>
+</nav>
+<!-- Header-->
+<header class=" table" style="color: white; background-image: linear-gradient(90deg, rgba(9,9,121,1) 0%, rgba(7,47,146,1) 17%, rgba(2,0,36,1) 73%, rgba(0,212,255,1) 100%); ">
+    <div class="container pt-xl-5 text-center">
+        <h1 class="fw-bolder">BIENVENIDO</h1>
+        <p class="lead">CONCURSO DE PREGUNTAS Y RESPUESTAS</p>
+    </div>
+</header>
+<section id="about" style="color: black; background-image: linear-gradient(90deg, rgba(238,174,202,1) 0%, rgba(110,119,207,1) 19%, rgba(110,119,207,1) 41%, rgba(110,119,207,1) 60%, rgba(110,119,207,1) 83%); ">
+    <div class="container px-4">
+        <div class="row gx-4 justify-content-center">
+            <div class="col-lg-8">
+                <h2>INSTRUCCIONES</h2>
+                <p class="lead">Este juego consta de una serie de preguntas, cada pregunta tiene 4 opciones de respuesta y una unica respuesta correcta. siendo estas sus reglas: </p>
+                <ul>
+                    <li>Para iniciar se debe pulsar el boton INICIAR</li>
+                    <li>El juego cuenta con 5 rondas para avanzar en una ronda se debe seleccionar la respuesta correcta</li>
+                    <li>Cada ronda tiene su dificulta entre mas alta la ronda mas dificil la pregunta</li>
+                    <li>Cada ronda tiene su puntaje especifico entre mas alta la ronda mas puntaje se obtiene</li>
+                    <li>Se puede terminar el juego en cualquier momento en ese caso se toma el puntaje acumulado</li>
+                    <li>Al Equivocarse en una pregunta se terminara el juego y su puntaje sera 0 </li>
+                    <li>El juego termina al finalizar todas las rondas</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+<div class="row">
+    <div class="col-12 text-left">
+        <button style="background-image: linear-gradient(to right, #314755 0%, #26a0da 51%, #314755 100%);
+             margin: 10px; padding: 15px 45px; text-align: center; text-transform: uppercase; transition: 0.5s;
+             background-size: 200% auto; color: white; box-shadow: 0 0 20px #eee; border-radius: 10px; display: block;" @onclick="go">
+            INICIAR
+        </button>
+
+    </div>
+</div>
+@if (ModalWindow==1) 
+{
+    <ModalUser></ModalUser>
+}
+
+
+
+
+
+@code {
+    public int ModalWindow; // variable para visualizar la ventana emergente 
+    public PreguntasRequest<object> response = new PreguntasRequest<object>(); // respuesta a la solicitud PUT para reinicializar la preguntas a su estado inicial
+    string url = "https://localhost:44376/api/Pregutas";
+    public PreguntasDb send = new PreguntasDb(); // se envia el estado 99 para devolver a su estado inicial el estado de cada una de las preguntas
+
+    public void go()
+    {
+        ModalWindow = 1;
+
+    }
+    //Al cargarse esta pagina reinicializa el estado de todas las respuestas en 0;
+    protected override async Task OnInitializedAsync() {
+
+        send.Estado = 99;
+        var respond = await http.PutAsJsonAsync<PreguntasDb>(url, send);
+        response = respond.Content.ReadFromJsonAsync<PreguntasRequest<object>>().Result;
+
+
+
+    }
+
+
+
+
+}

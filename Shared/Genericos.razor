@@ -1,0 +1,41 @@
+﻿@typeparam TItem
+
+
+@if (Item != null)
+{
+    @foreach (var item in Item)
+    {
+        
+        <div class="custom-radio">
+            <input type="radio" name="Respuesta" id="respuesta1" @onclick="_=> SelectRespuesta(item)"/>
+            <label for="respuesta1">@RespuestaPlantilla(item)</label>
+
+        </div>
+
+    }
+}
+
+
+
+@code {
+
+    [Parameter]
+    public IEnumerable<TItem> Item { get; set; }
+
+    [Parameter]
+    public RenderFragment<TItem> RespuestaPlantilla { get; set; }
+
+    [Parameter]
+    public IEnumerable<TItem> SelectedRespuesta { get; set; }
+
+    [Parameter]
+    public EventCallback<IEnumerable<TItem>> CheckRespuesta { get; set; }
+
+    void SelectRespuesta(TItem item)
+    {
+       
+
+    }
+
+
+}

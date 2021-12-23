@@ -1,0 +1,181 @@
+﻿@page "/preguntas"
+@using RetoFront.Data
+@using RetoFront.Components
+@using System.Net.Http.Json
+@using Newtonsoft.Json
+@inject HttpClient http
+@inject NavigationManager Navi
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark " id="mainNav">
+    <div class="container px-4">
+        <a class="navbar-brand text-left" style="color:white">Dificultad: @dificultad/ 5</a>
+        <a class="navbar-brand text-right" style="color:white">Puntaje: @puntaje </a>
+
+
+
+    </div>
+</nav>
+<!--muestra la pregunta actual-->
+@if (Obtener != null && Obtener.Data != null)
+{
+    <header class=" table" style="color: white; background-image: linear-gradient(90deg, rgba(9,9,121,1) 0%, rgba(7,47,146,1) 17%, rgba(2,0,36,1) 73%, rgba(0,212,255,1) 100%); ">
+        <div class="container pt-xl-5 text-center">
+            <h1 class="fw-bolder">@Obtener.Data.Preguntas</h1>
+
+        </div>
+    </header>
+
+}
+<!--muestra las respuestas asociadas a la pregunta actual-->
+@if (Obtener2 != null && Obtener2.Data != null)
+{
+
+    @foreach (var Element2 in Obtener2.Data)
+    {
+        <div class="custom-radio" style="background-image: linear-gradient(to right, #16222A 0%, #3A6073 51%, #16222A 100%);
+            margin: 10px; padding: 15px 45px; text-align: center; text-transform: uppercase; transition: 0.5s; background-size: 200% auto;
+            color: white; box-shadow: 0 0 20px #eee; border-radius: 10px; display: block; ">
+            <label>
+                <input type="radio" name="Respuesta" value="@Element2.Id" checked="@(Actualizar== Element2.Id)" @onchange="_=>getid(Element2.Correcta, Element2.Id)" /> @Element2.Respuestas
+            </label>
+
+        </div>
+
+    }
+
+    @if (SelectRespuesta == 1 && dificultad < 5)
+    {
+        <tr>
+            <td style="text-align:center">
+                <button class="btn btn-primary" style="background-image: linear-gradient(to right, #314755 0%, #26a0da 51%, #314755 100%);
+                margin: 10px; padding: 15px 45px; text-align: center; text-transform: uppercase; transition: 0.5s; background-size: 200% auto; color: white; box-shadow:
+                0 0 20px #eee; border-radius: 10px; display: block;" @onclick="OnInitializedAsync">
+                    Siguiente
+                </button>
+                <button class="btn btn-primary" style="background-image: linear-gradient(to left, #314755 0%, #26a0da 51%, #314755 100%);
+                margin: 10px; padding: 15px 45px; text-align: right; text-transform: uppercase; transition: 0.5s; background-size: 200% auto; color: white; box-shadow:
+                0 0 20px #eee; border-radius: 10px; display: block;" @onclick="GetPunt">
+                    Terminar
+                </button>
+            </td>
+        </tr>
+    }
+    else
+    {
+        <tr>
+            <td>
+                <!--muestra el boton siguiente solo si hay un dato seleccionado-->
+                @if (Actualizar != 0)
+                {
+                    <button class="btn btn-primary" style="background-image: linear-gradient(to right, #314755 0%, #26a0da 51%, #314755 100%);
+                margin: 10px; padding: 15px 45px; text-align: center; text-transform: uppercase; transition: 0.5s; background-size: 200% auto; color: white; box-shadow:
+                0 0 20px #eee; border-radius: 10px; display: block;" @onclick="Terminar">
+                        Siguiente
+                    </button>
+                }
+                <button class="btn btn-primary" style="background-image: linear-gradient(to right, #314755 0%, #26a0da 51%, #314755 100%);
+                margin: 10px; padding: 15px 45px; text-align: right; text-transform: uppercase; transition: 0.5s; background-size: 200% auto; color: white; box-shadow:
+                0 0 20px #eee; border-radius: 10px; display: block;" @onclick="GetPunt">
+                    Terminar
+                </button>
+            </td>
+        </tr>
+
+    }
+
+}
+@if (ModalWindows == 1)
+{
+
+    <ModalRespuestas Title="FELICIDADES!!!" Text="Tu puntaje es de:" puntaje="@puntaje"></ModalRespuestas>
+
+}
+@if (ModalWindows == 2)
+{
+
+    <ModalRespuestas Title="HAS FALLADO INTENTA NUEVAMENTE" Text="Tu puntaje es de:" puntaje="@puntaje"></ModalRespuestas>
+
+}
+
+
+@code {
+
+
+    public PreguntasRequest<PreguntasDb> Obtener = new PreguntasRequest<PreguntasDb>(); // obtinen pregunta aleatoria segun la dificultad
+    public RespuestasRequest<List<RespuestasDb>> Obtener2 { get; set; } = new RespuestasRequest<List<RespuestasDb>>(); // obtiene el listado de respuestas asociados a la pregunta
+    public PreguntasRequest<object> response = new PreguntasRequest<object>();
+    public UsersRequest<object> UserResponse = new UsersRequest<object>();
+    public UsersRequest<object> UserResponse2 = new UsersRequest<object>();
+    public PreguntasDb send = new PreguntasDb(); // variable para actualizar el estado de las preguntas y no repetir ninguna
+    public User Usersend = new User(); //usuario a enviar a la base de datos
+    string url = "https://localhost:44376/api/Pregutas"; //url a la API de preguntas
+    string url2 = "https://localhost:44376/api/Respuestas";  // url a la API de respuestas
+    string url3 = "https://localhost:44376/api/Users"; //url a la API de usuarios
+    int dificultad = 0; // dificultad/ronda de la pregunta
+    int dificultad2; // respuestas asosicadas a la pregunta
+    int SelectRespuesta; // (1: respuesta correcta 0:Respuesta incorrecta)
+    int Actualizar; // se usa para actualizar el contenido del checkbox
+    int puntaje; // variable que guarda el puntaje del juego
+    int ModalWindows; //variable que se utiliza para llamar ventana emergente
+
+    public RespuestasRequest<List<RespuestasDb>> pruebita { get; set; }
+
+    //Funcion que se utiliza para obtener las preguntas y respuestas de la base de datos
+    protected override async Task OnInitializedAsync()
+    {
+        dificultad = dificultad + 1; //aumenta dificultad/ronda
+        Obtener = await http.GetFromJsonAsync<PreguntasRequest<PreguntasDb>>(url + "/" + dificultad);
+        dificultad2 = Obtener.Data.Id;
+        Obtener2 = await http.GetFromJsonAsync<RespuestasRequest<List<RespuestasDb>>>(url2 + "/" + dificultad2);
+        SelectRespuesta = 0;
+        Actualizar = 0;
+        Obtener.Data.Estado = 1;
+        send = Obtener.Data;
+        var respond = await http.PutAsJsonAsync<PreguntasDb>(url, send);
+        response = respond.Content.ReadFromJsonAsync<PreguntasRequest<object>>().Result;
+        puntaje = puntaje + ((dificultad - 1) * 100);
+    }
+
+
+    // funcion que obtiene el valor de la respuesta (1: correcta 0: incorrecta) y el id de la pregunta seleccionada
+    public void getid(int res, int id)
+    {
+        SelectRespuesta = res;
+        Actualizar = id;
+    }
+
+    // funcion que se ejecuta al fallar o terminar el juego enviando el puntaje a la base de datos
+    private async void Terminar()
+    {
+        if (SelectRespuesta == 1)
+        {
+            ModalWindows = 1;
+
+        }
+        else
+        {
+            puntaje = 0;
+            ModalWindows = 2;
+
+        }
+        Usersend.Puntaje = puntaje;
+        send.Estado = 99;
+        var respond2 = await http.PutAsJsonAsync<User>(url3, Usersend);
+        UserResponse2 = respond2.Content.ReadFromJsonAsync<UsersRequest<object>>().Result;
+
+
+
+    }
+    //funcion que se ejecuta al terminar el juego en cualquier momento y envia el puntaje actual  a la base de datos
+    private async void GetPunt()
+    {
+        ModalWindows = 1;
+        Usersend.Puntaje = puntaje;
+        var respond = await http.PutAsJsonAsync<User>(url3, Usersend);
+        UserResponse = respond.Content.ReadFromJsonAsync<UsersRequest<object>>().Result;
+
+    }
+
+
+
+}

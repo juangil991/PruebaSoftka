@@ -1,0 +1,41 @@
+﻿@using RetoFront.Data
+@using RetoFront.Components
+@using System.Net.Http.Json
+@using Newtonsoft.Json
+@inject HttpClient http
+@inject NavigationManager Navi
+<!-- ventana emergente para mostrar los resultados al finalizar el juego-->
+
+<div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">@Title</h4>
+            </div>
+            <div class="modal-body">
+                <p>@Text @puntaje</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" @onclick="go">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    //datos obtenidos por parametros para modificar los valores a visualizar
+    [Parameter]
+    public string Title { get; set; }
+    [Parameter]
+    public string Text { get; set; }
+    [Parameter]
+    public int  puntaje { get; set; }
+
+    // se ejecuta al precionar el boton ok lleva a la pagina principal
+    public void go() {
+
+        Navi.NavigateTo("/History");
+
+    }
+}
+}
